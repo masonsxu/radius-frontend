@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { store } from '../store';
 import { clearAuth, setToken } from '../store/slices/authSlice';
 
@@ -75,3 +76,5 @@ function getCookie(name: string): string | null {
 }
 
 export default api;
+// 添加命名导出，以支持 import { api } from './api' 的导入方式
+export { api };

@@ -1,28 +1,53 @@
-// API响应通用类型
-export enum ErrorCode {
-  SUCCESS = 0,
-  INVALID_PARAM = 1,
-  RESOURCE_NOT_FOUND = 2,
-  RESOURCE_EXIST = 3,
-  PERMISSION_DENIED = 4,
-  SYSTEM_ERROR = 5,
-  DB_ERROR = 6,
-  AUTH_FAILED = 7,
-  INVALID_TOKEN = 8,
-  TOKEN_EXPIRED = 9,
-  ACCOUNT_LOCKED = 10,
-  ACCOUNT_DISABLED = 11,
+// 登录相关类型
+export interface LoginRequest {
+  username: string;
+  password: string;
 }
 
+export interface LoginUserInfo {
+  userId: string;
+  username: string;
+  name: string;
+  loginTime: number;
+}
+
+export interface LoginResponse {
+  base: BaseResponse;
+  accessToken: string;
+  refreshToken: string;
+  expireTime: number;
+  userInfo: LoginUserInfo;
+}
+
+export interface LogoutRequest {
+  accessToken: string;
+  userId: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface TokenVerifyRequest {
+  accessToken: string;
+}
+
+export interface TokenVerifyResponse {
+  base: BaseResponse;
+  userInfo: LoginUserInfo;
+}
+
+// 基础响应类型
 export interface BaseResponse {
-  code: ErrorCode;
+  code: number;
   message: string;
 }
 
+// 分页相关类型
 export interface PageRequest {
+  pageNum?: number;
+  pageSize?: number;
   keyword?: string;
-  pageNum: number;
-  pageSize: number;
 }
 
 export interface PageResponse {
@@ -32,62 +57,152 @@ export interface PageResponse {
   totalPages: number;
 }
 
-// 组织相关类型
-export enum GroupType {
-  HOSPITAL = 1,
-  CAMPUS = 2,
-  DEPARTMENT = 3,
-  TEAM = 4,
-}
-
-export interface Group {
+// 权限相关类型
+export interface Permission {
   id: string;
   name: string;
   code: string;
   description?: string;
-  type: GroupType;
-  parentId?: string;
+  createTime: number;
+  updateTime: number;
+}
+
+export interface ListPermissionsRequest extends PageRequest {
+  // 可以添加特定于权限列表的参数
+}
+
+export interface CreatePermissionRequest {
+  name: string;
+  code: string;
+  description?: string;
+}
+
+export interface UpdatePermissionRequest {
+  id: string;
+  name?: string;
+  code?: string;
+  description?: string;
+}
+
+export interface PermissionResponse {
+  base: BaseResponse;
+  permission?: Permission;
+}
+
+export interface BatchPermissionResponse {
+  base: BaseResponse;
+  permissions: Permission[];
+  page?: PageResponse;
+}
+
+// 角色相关类型
+export interface Role {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
   isEnabled: boolean;
   createTime: number;
   updateTime: number;
 }
 
+export interface ListRolesRequest extends PageRequest {
+  // 可以添加特定于角色列表的参数
+}
+
+export interface CreateRoleRequest {
+  name: string;
+  code: string;
+  description?: string;
+  isEnabled?: boolean;
+}
+
+export interface UpdateRoleRequest {
+  id: string;
+  name?: string;
+  code?: string;
+  description?: string;
+  isEnabled?: boolean;
+}
+
+export interface RoleResponse {
+  base: BaseResponse;
+  role?: Role;
+}
+
+export interface BatchRoleResponse {
+  base: BaseResponse;
+  roles: Role[];
+  page?: PageResponse;
+}
+
+export interface AssignPermissionsToRoleRequest {
+  roleId: string;
+  permissionIds: string[];
+}
+
+export interface RemovePermissionsFromRoleRequest {
+  roleId: string;
+  permissionIds: string[];
+}
+
+// 组织相关类型
+export type GroupType = 1 | 2 | 3 | 4;
+
+export const GroupType = {
+  HOSPITAL: 1 as GroupType,
+  CAMPUS: 2 as GroupType,
+  DEPARTMENT: 3 as GroupType,
+  TEAM: 4 as GroupType
+};
+
+export interface Group {
+  id: string;
+  code: string;
+  name: string;
+  type: GroupType;
+  parentId?: string;
+  description?: string;
+  isEnabled: boolean;
+  createTime: number;
+  updateTime: number;
+}
+
+export interface ListGroupsRequest extends PageRequest {
+  code?: string;
+  type?: GroupType;
+  parentId?: string;
+  isEnabled?: boolean;
+}
+
+export interface CreateGroupRequest {
+  code?: string;
+  name: string;
+  type: GroupType;
+  parentId?: string;
+  description?: string;
+  isEnabled?: boolean;
+}
+
+export interface UpdateGroupRequest {
+  id: string;
+  code?: string;
+  name?: string;
+  type?: GroupType;
+  parentId?: string;
+  description?: string;
+  isEnabled?: boolean;
+}
+
 export interface GroupResponse {
   base: BaseResponse;
-  group: Group;
+  group?: Group;
 }
 
 export interface BatchGroupResponse {
   base: BaseResponse;
   groups: Group[];
-  page: PageResponse;
-}
-
-export interface ListGroupsRequest {
-  code?: string;
-  isEnabled?: boolean;
-  parentId?: string;
-  type?: GroupType;
-  page: PageRequest;
-}
-
-export interface CreateGroupRequest {
-  code: string;
-  name: string;
-  description?: string;
-  type: GroupType;
-  parentId?: string;
-  isEnabled: boolean;
-}
-
-export interface UpdateGroupRequest {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  type: GroupType;
-  parentId?: string;
-  isEnabled: boolean;
+  page?: PageResponse;
 }
 
 export interface AssignRolesToGroupRequest {
@@ -100,134 +215,55 @@ export interface RemoveRolesFromGroupRequest {
   roleIds: string[];
 }
 
-// 权限相关类型
-export interface Permission {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  createTime: number;
-  updateTime: number;
-}
-
-export interface PermissionResponse {
-  base: BaseResponse;
-  permission: Permission;
-}
-
-export interface BatchPermissionResponse {
-  base: BaseResponse;
-  permissions: Permission[];
-  page: PageResponse;
-}
-
-export interface ListPermissionsRequest {
-  code?: string;
-  page: PageRequest;
-}
-
-export interface CreatePermissionRequest {
-  code: string;
-  name: string;
-  description?: string;
-}
-
-export interface UpdatePermissionRequest {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-}
-
-// 角色相关类型
-export interface Role {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  isEnabled: boolean;
-  createTime: number;
-  updateTime: number;
-}
-
-export interface RoleResponse {
-  base: BaseResponse;
-  role: Role;
-}
-
-export interface BatchRoleResponse {
-  base: BaseResponse;
-  roles: Role[];
-  page: PageResponse;
-}
-
-export interface ListRolesRequest {
-  code?: string;
-  isEnabled?: boolean;
-  page: PageRequest;
-}
-
-export interface CreateRoleRequest {
-  code: string;
-  name: string;
-  description?: string;
-  isEnabled: boolean;
-}
-
-export interface UpdateRoleRequest {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  isEnabled: boolean;
-}
-
 // 用户相关类型
 export interface User {
   id: string;
   username: string;
-  name: string;
   employeeId: string;
+  name?: string;
   description?: string;
   isEnabled: boolean;
   createTime: number;
   updateTime: number;
 }
 
+export interface ListUsersRequest extends PageRequest {
+  username?: string;
+  employeeId?: string;
+  isEnabled?: boolean;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  employeeId: string;
+  name?: string;
+  description?: string;
+  isEnabled?: boolean;
+  initialPassword: string;
+}
+
+export interface UpdateUserRequest {
+  id: string;
+  username?: string;
+  employeeId?: string;
+  name?: string;
+  description?: string;
+  isEnabled?: boolean;
+}
+
 export interface UserResponse {
   base: BaseResponse;
-  user: User;
+  user?: User;
 }
 
 export interface BatchUserResponse {
   base: BaseResponse;
   users: User[];
-  page: PageResponse;
+  page?: PageResponse;
 }
 
-export interface ListUsersRequest {
-  username?: string;
-  employeeId?: string;
-  isEnabled?: boolean;
-  page: PageRequest;
-}
-
-export interface CreateUserRequest {
-  username: string;
-  name: string;
-  employeeId: string;
-  description?: string;
-  initialPassword: string;
-  isEnabled: boolean;
-}
-
-export interface UpdateUserRequest {
+export interface DeleteUserRequest {
   id: string;
-  username: string;
-  name: string;
-  employeeId: string;
-  description?: string;
-  isEnabled: boolean;
 }
 
 export interface UpdatePasswordRequest {
@@ -251,60 +287,15 @@ export interface RemoveUserFromGroupsRequest {
   groupIds: string[];
 }
 
-export interface GetUserAllPermissionsRequest {
-  userId: string;
-  groupId?: string;
-}
-
-// 认证相关类型
-export interface LoginUserInfo {
-  userId: string;
-  username: string;
-  name: string;
-  employeeId: string;
-  loginTime: number;
-  groups: Group[];
-  roles: Role[];
-}
-
-export interface LoginRequest {
-  username: string;
-  password: string;
-  clientId?: string;
-  deviceInfo?: string;
-}
-
-export interface LoginResponse {
-  base: BaseResponse;
-  accessToken: string;
-  refreshToken: string;
-  expireTime: number;
-  userInfo: LoginUserInfo;
-}
-
-export interface LogoutRequest {
-  accessToken: string;
+export interface GetUserGroupsRequest {
   userId: string;
 }
 
-export interface RefreshTokenRequest {
-  clientId?: string;
-  refreshToken: string;
-}
-
-export interface TokenVerifyRequest {
-  accessToken: string;
-}
-
-export interface TokenVerifyResponse {
-  base: BaseResponse;
-  userInfo: LoginUserInfo;
-}
-
+// 权限检查相关类型
 export interface CheckPermissionRequest {
   userId: string;
-  groupId?: string;
   permissionCode: string;
+  groupId?: string;
 }
 
 export interface CheckPermissionResponse {
@@ -312,37 +303,98 @@ export interface CheckPermissionResponse {
   hasPermission: boolean;
 }
 
-// 菜单相关类型
-export enum MenuType {
-  DIRECTORY = 1,
-  MENU = 2,
-  BUTTON = 3,
+export interface GetUserAllPermissionsRequest {
+  userId: string;
+  groupId?: string;
 }
+
+// 菜单相关类型
+export type MenuType = 1 | 2 | 3;
+
+export const MenuType = {
+  DIRECTORY: 1 as MenuType,
+  MENU: 2 as MenuType,
+  BUTTON: 3 as MenuType
+};
 
 export interface Menu {
   id: string;
   name: string;
-  path: string;
+  parentId?: string;
+  path?: string;
   component?: string;
   icon?: string;
   type: MenuType;
-  parentId?: string;
-  order: number;
+  order?: number;
   isEnabled: boolean;
-  permissions?: Permission[];
   createTime: number;
   updateTime: number;
+  permissions?: Permission[];
+}
+
+export interface CreateMenuRequest {
+  name: string;
+  parentId?: string;
+  path?: string;
+  component?: string;
+  icon?: string;
+  type: MenuType;
+  order?: number;
+  isEnabled?: boolean;
+}
+
+export interface UpdateMenuRequest {
+  id: string;
+  name?: string;
+  parentId?: string;
+  path?: string;
+  component?: string;
+  icon?: string;
+  type?: MenuType;
+  order?: number;
+  isEnabled?: boolean;
 }
 
 export interface MenuResponse {
   base: BaseResponse;
-  menu: Menu;
+  menu?: Menu;
 }
 
 export interface BatchMenuResponse {
   base: BaseResponse;
   menus: Menu[];
-  page: PageResponse;
+  page?: PageResponse;
+}
+
+export interface GetMenuRequest {
+  id: string;
+}
+
+export interface DeleteMenuRequest {
+  id: string;
+}
+
+export interface ListMenusRequest extends PageRequest {
+  name?: string;
+  isEnabled?: boolean;
+}
+
+export interface AssignPermissionsToMenuRequest {
+  menuId: string;
+  permissionIds: string[];
+}
+
+export interface GetMenuPermissionsRequest {
+  menuId: string;
+}
+
+export interface RemovePermissionsFromMenuRequest {
+  menuId: string;
+  permissionIds: string[];
+}
+
+export interface GetUserMenusRequest {
+  userId: string;
 }
 
 export interface GetUserMenusResponse {
@@ -350,36 +402,7 @@ export interface GetUserMenusResponse {
   menus: Menu[];
 }
 
-export interface ListMenusRequest {
-  name?: string;
-  isEnabled?: boolean;
-  page: PageRequest;
-}
-
-export interface CreateMenuRequest {
-  name: string;
-  path: string;
-  component?: string;
-  icon?: string;
-  type: MenuType;
-  parentId?: string;
-  order: number;
-  isEnabled: boolean;
-}
-
-export interface UpdateMenuRequest {
-  id: string;
-  name: string;
-  path: string;
-  component?: string;
-  icon?: string;
-  type: MenuType;
-  parentId?: string;
-  order: number;
-  isEnabled: boolean;
-}
-
-// Redux状态类型
+// 状态管理相关类型
 export interface AuthState {
   isAuthenticated: boolean;
   user: LoginUserInfo | null;
@@ -387,4 +410,49 @@ export interface AuthState {
   permissions: string[];
   loading: boolean;
   error: string | null;
+}
+
+export interface UserState {
+  users: User[];
+  currentUser: User | null;
+  loading: boolean;
+  error: string | null;
+  pagination: PageResponse | null;
+}
+
+export interface GroupState {
+  groups: Group[];
+  currentGroup: Group | null;
+  groupRoles: Role[];
+  loading: boolean;
+  error: string | null;
+  pagination: PageResponse | null;
+  rolesPagination: PageResponse | null;
+}
+
+export interface PermissionState {
+  permissions: Permission[];
+  currentPermission: Permission | null;
+  loading: boolean;
+  error: string | null;
+  pagination: PageResponse | null;
+}
+
+export interface RoleState {
+  roles: Role[];
+  currentRole: Role | null;
+  rolePermissions: Permission[];
+  loading: boolean;
+  error: string | null;
+  pagination: PageResponse | null;
+  permissionsPagination: PageResponse | null;
+}
+
+export interface MenuState {
+  menus: Menu[];
+  currentMenu: Menu | null;
+  userMenus: Menu[];
+  loading: boolean;
+  error: string | null;
+  pagination: PageResponse | null;
 }
