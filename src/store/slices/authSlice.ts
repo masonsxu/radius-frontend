@@ -1,7 +1,8 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { authService } from '../../services/auth';
-import type { AuthState, LoginRequest, LoginResponse } from '../../types';
+import { roleService } from '../../services/role';
+import type { AuthState, LoginRequest, LoginResponse, TokenVerifyResponse } from '../../types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -17,9 +18,18 @@ export const loginAsync = createAsyncThunk(
   'auth/login',
   async (credentials: LoginRequest) => {
     const response = await authService.login(credentials);
-    // 存储令牌到sessionStorage
     sessionStorage.setItem('accessToken', response.accessToken);
-    return response;
+
+    const roles = response.userInfo.roles;
+    if (roles && roles.length > 0) {
+      const permissionPromises = roles.map(role => roleService.getRolePermissions(role.id));
+      const permissionResponses = await Promise.all(permissionPromises);
+      const permissions = permissionResponses.flatMap(res => res.permissions.map(p => p.code));
+      const uniquePermissions = [...new Set(permissions)];
+      return { ...response, permissions: uniquePermissions };
+    }
+
+    return { ...response, permissions: [] };
   },
 );
 
@@ -36,8 +46,23 @@ export const logoutAsync = createAsyncThunk(
 export const verifyTokenAsync = createAsyncThunk(
   'auth/verify',
   async () => {
-    const response = await authService.verifyToken();
-    return response;
+    try {
+      const response = await authService.verifyToken();
+      if (response) {
+        const roles = response.userInfo.roles;
+        if (roles && roles.length > 0) {
+          const permissionPromises = roles.map(role => roleService.getRolePermissions(role.id));
+          const permissionResponses = await Promise.all(permissionPromises);
+          const permissions = permissionResponses.flatMap(res => res.permissions.map(p => p.code));
+          const uniquePermissions = [...new Set(permissions)];
+          return { ...response, permissions: uniquePermissions };
+        }
+        return { ...response, permissions: [] };
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
   },
 );
 
@@ -68,17 +93,12 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(loginAsync.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
+      .addCase(loginAsync.fulfilled, (state, action: PayloadAction<LoginResponse & { permissions: string[] }>) => {
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.userInfo;
         state.token = action.payload.accessToken;
-        // 从用户的角色中提取权限
-        const permissions: string[] = [];
-        action.payload.userInfo.roles?.forEach(role => {
-          // 这里需要获取角色对应的权限，暂时先用空数组
-        });
-        state.permissions = permissions;
+        state.permissions = action.payload.permissions;
         state.error = null;
       })
       .addCase(loginAsync.rejected, (state, action) => {
@@ -93,16 +113,11 @@ const authSlice = createSlice({
         state.permissions = [];
       })
       // 验证令牌
-      .addCase(verifyTokenAsync.fulfilled, (state, action) => {
+      .addCase(verifyTokenAsync.fulfilled, (state, action: PayloadAction<(TokenVerifyResponse & { permissions: string[] }) | null>) => {
         if (action.payload) {
           state.isAuthenticated = true;
           state.user = action.payload.userInfo;
-          // 从用户的角色中提取权限
-          const permissions: string[] = [];
-          action.payload.userInfo.roles?.forEach(role => {
-            // 这里需要获取角色对应的权限，暂时先用空数组
-          });
-          state.permissions = permissions;
+          state.permissions = action.payload.permissions;
         } else {
           state.isAuthenticated = false;
           state.user = null;

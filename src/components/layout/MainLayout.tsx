@@ -18,7 +18,7 @@ import {
   theme,
 } from 'antd';
 import React, { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { logoutAsync } from '../../store/slices/authSlice';
 
@@ -27,6 +27,7 @@ const { Header, Sider, Content } = Layout;
 const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector(state => state.auth);
   const {
@@ -76,6 +77,9 @@ const MainLayout: React.FC = () => {
     if (!item.permission) return true;
     return permissions.includes(item.permission);
   });
+
+  console.log('Permissions:', permissions);
+  console.log('Filtered Menu Items:', filteredMenuItems);
 
   const userDropdownItems = [
     {

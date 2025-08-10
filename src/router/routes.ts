@@ -40,7 +40,7 @@ export const routeConfig: RouteConfig[] = [
     children: [
       {
         path: '',
-        element: () => React.createElement(Navigate, { to: "/dashboard", replace: true }),
+        element: function Redirect() { return React.createElement(Navigate, { to: '/dashboard', replace: true }); },
       },
       {
         path: 'dashboard',

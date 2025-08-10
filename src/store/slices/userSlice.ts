@@ -66,6 +66,15 @@ export const updateUserAsync = createAsyncThunk(
   },
 );
 
+// 异步更新用户状态
+export const updateUserStatusAsync = createAsyncThunk(
+  'user/updateUserStatus',
+  async ({ userId, isEnabled }: { userId: string, isEnabled: boolean }) => {
+    const response = await userService.updateUser({ id: userId, isEnabled });
+    return { response, userId, isEnabled };
+  },
+);
+
 // 异步删除用户
 export const deleteUserAsync = createAsyncThunk(
   'user/deleteUser',
@@ -171,6 +180,27 @@ const userSlice = createSlice({
       .addCase(updateUserAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || '更新用户失败';
+      })
+      // 更新用户状态
+      .addCase(updateUserStatusAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUserStatusAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        const { userId, isEnabled } = action.payload;
+        const index = state.users.findIndex(user => user.id === userId);
+        if (index !== -1) {
+          state.users[index].isEnabled = isEnabled;
+        }
+        if (state.currentUser && state.currentUser.id === userId) {
+          state.currentUser.isEnabled = isEnabled;
+        }
+        state.error = null;
+      })
+      .addCase(updateUserStatusAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || '更新用户状态失败';
       })
       // 删除用户
       .addCase(deleteUserAsync.pending, (state) => {

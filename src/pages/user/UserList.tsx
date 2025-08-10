@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Table,
   Button,
@@ -6,12 +6,12 @@ import {
   Space,
   Card,
   Typography,
-  Tag,
   Pagination,
   Modal,
   message,
   Tooltip,
   Switch,
+  Select,
 } from 'antd';
 import {
   PlusOutlined,
@@ -28,57 +28,46 @@ import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { 
   fetchUsersAsync, 
   deleteUserAsync, 
+  updateUserStatusAsync, 
   clearError 
 } from '../../store/slices/userSlice';
-import { User, ListUsersRequest, PageRequest } from '../../types';
+import { User, ListUsersRequest } from '../../types';
 import { formatDateTime } from '../../utils';
 import PermissionGuard from '../../components/business/PermissionGuard';
 
-const { Search } = Input;
 const { Title } = Typography;
 const { confirm } = Modal;
+const { Option } = Select;
 
 const UserList: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { users, loading, error, pagination } = useAppSelector(state => state.user);
 
-  // 搜索和分页状态
   const [searchParams, setSearchParams] = useState<{
     username: string;
     employeeId: string;
-    isEnabled: boolean | undefined;
-  }>({
-    username: '',
-    employeeId: '',
-    isEnabled: undefined,
-  });
+    isEnabled?: boolean;
+  }>({ username: '', employeeId: '' });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // 获取用户列表
-  const fetchUsers = () => {
+  const fetchUsers = useCallback(() => {
     const params: ListUsersRequest = {
-      page: {
-        pageNum: currentPage,
-        pageSize: pageSize,
-        keyword: searchParams.username || searchParams.employeeId || '',
-      },
+      pageNum: currentPage,
+      pageSize: pageSize,
       username: searchParams.username || undefined,
       employeeId: searchParams.employeeId || undefined,
       isEnabled: searchParams.isEnabled,
     };
-
     dispatch(fetchUsersAsync(params));
-  };
+  }, [dispatch, currentPage, pageSize, searchParams]);
 
-  // 初始加载
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, pageSize]);
+  }, [fetchUsers]);
 
-  // 错误处理
   useEffect(() => {
     if (error) {
       message.error(error);
@@ -86,30 +75,20 @@ const UserList: React.FC = () => {
     }
   }, [error, dispatch]);
 
-  // 搜索处理
   const handleSearch = () => {
     setCurrentPage(1);
     fetchUsers();
   };
 
-  // 重置搜索
   const handleReset = () => {
-    setSearchParams({
-      username: '',
-      employeeId: '',
-      isEnabled: undefined,
-    });
+    setSearchParams({ username: '', employeeId: '' });
     setCurrentPage(1);
-    setTimeout(() => {
-      fetchUsers();
-    }, 0);
   };
 
-  // 删除用户
   const handleDelete = (user: User) => {
     confirm({
       title: '删除用户',
-      content: `确定要删除用户 "${user.name}" 吗？此操作不可恢复。`,
+      content: `确定要删除用户 "${user.name || user.username}" 吗？此操作不可恢复。`,
       okText: '确定',
       okType: 'danger',
       cancelText: '取消',
@@ -124,19 +103,20 @@ const UserList: React.FC = () => {
     });
   };
 
-  // 页码变化
   const handlePageChange = (page: number, size: number) => {
     setCurrentPage(page);
     setPageSize(size);
   };
 
-  // 状态切换
-  const handleStatusChange = (userId: string, enabled: boolean) => {
-    // TODO: 实现状态切换API
-    message.info('状态切换功能待实现');
+  const handleStatusChange = (userId: string, isEnabled: boolean) => {
+    dispatch(updateUserStatusAsync({ userId, isEnabled })).then((result) => {
+      if (result.meta.requestStatus === 'fulfilled') {
+        message.success('用户状态更新成功');
+        fetchUsers();
+      }
+    });
   };
 
-  // 表格列定义
   const columns: ColumnsType<User> = [
     {
       title: '用户名',
@@ -254,7 +234,6 @@ const UserList: React.FC = () => {
       </div>
 
       <Card>
-        {/* 搜索区域 */}
         <div style={{ marginBottom: 16 }}>
           <Space wrap>
             <Input
@@ -269,6 +248,16 @@ const UserList: React.FC = () => {
               onChange={(e) => setSearchParams(prev => ({ ...prev, employeeId: e.target.value }))}
               style={{ width: 150 }}
             />
+            <Select
+              placeholder="状态"
+              allowClear
+              style={{ width: 120 }}
+              value={searchParams.isEnabled}
+              onChange={(value) => setSearchParams(prev => ({ ...prev, isEnabled: value }))}
+            >
+              <Option value={true}>启用</Option>
+              <Option value={false}>禁用</Option>
+            </Select>
             <Button type="primary" onClick={handleSearch}>
               搜索
             </Button>
@@ -285,7 +274,6 @@ const UserList: React.FC = () => {
           </Space>
         </div>
 
-        {/* 用户表格 */}
         <Table
           columns={columns}
           dataSource={users}
@@ -295,7 +283,6 @@ const UserList: React.FC = () => {
           scroll={{ x: 'max-content' }}
         />
 
-        {/* 分页 */}
         {pagination && (
           <div style={{ marginTop: 16, textAlign: 'right' }}>
             <Pagination
