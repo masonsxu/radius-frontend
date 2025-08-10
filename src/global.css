@@ -1,0 +1,43 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+#root {
+  height: 100%;
+}
+
+.ant-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ant-layout-sider {
+  overflow: auto;
+  flex: 0 0 auto; /* 确保 Sider 不会伸缩 */
+}
+
+.ant-layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* 确保 Content 区域宽度为 100% */
+  box-sizing: border-box; /* 确保内边距和边框不会影响宽度 */
+}
+
+/* 暗色模式 */
+body.dark {
+  background-color: #181a1b;
+  color: #e0e0e0;
+}
+
+.ant-layout-header,
+.ant-layout-footer,
+.ant-menu-dark {
+  background-color: #181a1b;
+  color: #e0e0e0;
+}

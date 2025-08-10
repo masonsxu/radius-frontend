@@ -5,7 +5,7 @@ import { clearAuth, setToken } from '../store/slices/authSlice';
 
 // 创建 axios 实例
 const api: AxiosInstance = axios.create({
-  baseURL: '/api/v1',
+  baseURL: 'http://localhost:8080/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

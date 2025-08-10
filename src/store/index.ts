@@ -8,7 +8,11 @@ import roleReducer from './slices/roleSlice';
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
+    // 动态导入 authReducer
+    auth: async () => {
+      const module = await import('./slices/authSlice');
+      return module.default;
+    },
     user: userReducer,
     group: groupReducer,
     permission: permissionReducer,
@@ -17,7 +21,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }),
 });

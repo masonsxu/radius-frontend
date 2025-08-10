@@ -6,7 +6,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { loginAsync, clearError } from '../../store/slices/authSlice';
-import type { LoginRequest } from '../../types';
+import type { LoginRequest, AuthState } from '../../types';
 
 const { Title, Text } = Typography;
 
@@ -25,7 +25,7 @@ const LoginPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { loading, error } = useAppSelector(state => state.auth);
+  const { loading, error } = useAppSelector(state => state.auth as unknown as AuthState);
 
   const from = location.state?.from?.pathname || '/dashboard';
 
