@@ -2,11 +2,11 @@ import React from 'react';
 import { Form, Input, Button, Card, Alert, Typography } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Formik, FormikProps } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { loginAsync, clearError } from '../../store/slices/authSlice';
-import { LoginRequest } from '../../types';
+import type { LoginRequest } from '../../types';
 
 const { Title, Text } = Typography;
 
@@ -88,53 +88,56 @@ const LoginPage: React.FC = () => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit }: FormikProps<LoginRequest>) => (
-            <Form onFinish={handleSubmit} layout="vertical">
-              <Form.Item
-                label="用户名"
-                validateStatus={errors.username && touched.username ? 'error' : ''}
-                help={errors.username && touched.username ? errors.username : ''}
-              >
-                <Input
-                  name="username"
-                  size="large"
-                  prefix={<UserOutlined />}
-                  placeholder="请输入用户名"
-                  value={values.username}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="密码"
-                validateStatus={errors.password && touched.password ? 'error' : ''}
-                help={errors.password && touched.password ? errors.password : ''}
-              >
-                <Input.Password
-                  name="password"
-                  size="large"
-                  prefix={<LockOutlined />}
-                  placeholder="请输入密码"
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  size="large"
-                  loading={loading}
-                  block
+          {(formikProps) => {
+            const { values, errors, touched, handleChange, handleBlur, handleSubmit } = formikProps;
+            return (
+              <Form onFinish={handleSubmit} layout="vertical">
+                <Form.Item
+                  label="用户名"
+                  validateStatus={errors.username && touched.username ? 'error' : ''}
+                  help={errors.username && touched.username ? errors.username : ''}
                 >
-                  {loading ? '登录中...' : '登录'}
-                </Button>
-              </Form.Item>
-            </Form>
-          )}
+                  <Input
+                    name="username"
+                    size="large"
+                    prefix={<UserOutlined />}
+                    placeholder="请输入用户名"
+                    value={values.username}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="密码"
+                  validateStatus={errors.password && touched.password ? 'error' : ''}
+                  help={errors.password && touched.password ? errors.password : ''}
+                >
+                  <Input.Password
+                    name="password"
+                    size="large"
+                    prefix={<LockOutlined />}
+                    placeholder="请输入密码"
+                    value={values.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </Form.Item>
+
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    loading={loading}
+                    block
+                  >
+                    {loading ? '登录中...' : '登录'}
+                  </Button>
+                </Form.Item>
+              </Form>
+            );
+          }}
         </Formik>
       </Card>
     </div>
