@@ -126,7 +126,7 @@ const permissionSlice = createSlice({
       .addCase(fetchPermissionsAsync.fulfilled, (state, action: PayloadAction<BatchPermissionResponse>) => {
         state.loading = false;
         state.permissions = action.payload.permissions;
-        state.pagination = action.payload.page;
+        state.pagination = action.payload.page || null;
         state.error = null;
       })
       .addCase(fetchPermissionsAsync.rejected, (state, action) => {
@@ -140,7 +140,7 @@ const permissionSlice = createSlice({
       })
       .addCase(fetchPermissionByIdAsync.fulfilled, (state, action: PayloadAction<PermissionResponse>) => {
         state.loading = false;
-        state.currentPermission = action.payload.permission;
+        state.currentPermission = action.payload.permission || null;
         state.error = null;
       })
       .addCase(fetchPermissionByIdAsync.rejected, (state, action) => {
@@ -154,7 +154,9 @@ const permissionSlice = createSlice({
       })
       .addCase(createPermissionAsync.fulfilled, (state, action: PayloadAction<PermissionResponse>) => {
         state.loading = false;
-        state.permissions.unshift(action.payload.permission);
+        if (action.payload.permission) {
+          state.permissions.unshift(action.payload.permission);
+        }
         state.error = null;
       })
       .addCase(createPermissionAsync.rejected, (state, action) => {
@@ -169,11 +171,11 @@ const permissionSlice = createSlice({
       .addCase(updatePermissionAsync.fulfilled, (state, action) => {
         state.loading = false;
         const { id, data } = action.payload;
-        const index = state.permissions.findIndex(permission => permission.id === id);
+        const index = state.permissions.findIndex(permission => permission.id === id.toString());
         if (index !== -1) {
           state.permissions[index] = { ...state.permissions[index], ...data };
         }
-        if (state.currentPermission && state.currentPermission.id === id) {
+        if (state.currentPermission && state.currentPermission.id === id.toString()) {
           state.currentPermission = { ...state.currentPermission, ...data };
         }
         state.error = null;
@@ -190,8 +192,8 @@ const permissionSlice = createSlice({
       .addCase(deletePermissionAsync.fulfilled, (state, action) => {
         state.loading = false;
         const { id } = action.payload;
-        state.permissions = state.permissions.filter(permission => permission.id !== id);
-        if (state.currentPermission && state.currentPermission.id === id) {
+        state.permissions = state.permissions.filter(permission => permission.id !== id.toString());
+        if (state.currentPermission && state.currentPermission.id === id.toString()) {
           state.currentPermission = null;
         }
         state.error = null;
@@ -208,7 +210,8 @@ const permissionSlice = createSlice({
       .addCase(batchDeletePermissionsAsync.fulfilled, (state, action) => {
         state.loading = false;
         const { ids } = action.payload;
-        state.permissions = state.permissions.filter(permission => !ids.includes(permission.id));
+        const idStrings = ids.map(id => id.toString());
+        state.permissions = state.permissions.filter(permission => !idStrings.includes(permission.id));
         state.error = null;
       })
       .addCase(batchDeletePermissionsAsync.rejected, (state, action) => {
@@ -237,7 +240,7 @@ const permissionSlice = createSlice({
       .addCase(searchPermissionsAsync.fulfilled, (state, action: PayloadAction<BatchPermissionResponse>) => {
         state.loading = false;
         state.permissions = action.payload.permissions;
-        state.pagination = action.payload.page;
+        state.pagination = action.payload.page || null;
         state.error = null;
       })
       .addCase(searchPermissionsAsync.rejected, (state, action) => {

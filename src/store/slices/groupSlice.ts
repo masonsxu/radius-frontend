@@ -67,8 +67,8 @@ export const createGroupAsync = createAsyncThunk(
 export const updateGroupAsync = createAsyncThunk(
   'group/updateGroup',
   async ({ id, data }: { id: number; data: UpdateGroupRequest }) => {
-    const response = await groupService.updateGroup(id.toString(), data);
-    return { response, id, data };
+    const response = await groupService.updateGroup({ ...data, id: id.toString() });
+    return { response, id: id.toString(), data };
   },
 );
 
@@ -77,7 +77,7 @@ export const deleteGroupAsync = createAsyncThunk(
   'group/deleteGroup',
   async (id: number) => {
     const response = await groupService.deleteGroup(id.toString());
-    return { response, id };
+    return { response, id: id.toString() };
   },
 );
 
@@ -133,7 +133,7 @@ const groupSlice = createSlice({
       .addCase(fetchGroupsAsync.fulfilled, (state, action: PayloadAction<BatchGroupResponse>) => {
         state.loading = false;
         state.groups = action.payload.groups;
-        state.pagination = action.payload.page;
+        state.pagination = action.payload.page || null;
         state.error = null;
       })
       .addCase(fetchGroupsAsync.rejected, (state, action) => {
@@ -147,7 +147,7 @@ const groupSlice = createSlice({
       })
       .addCase(fetchGroupByIdAsync.fulfilled, (state, action: PayloadAction<GroupResponse>) => {
         state.loading = false;
-        state.currentGroup = action.payload.group;
+        state.currentGroup = action.payload.group || null;
         state.error = null;
       })
       .addCase(fetchGroupByIdAsync.rejected, (state, action) => {
@@ -161,7 +161,9 @@ const groupSlice = createSlice({
       })
       .addCase(createGroupAsync.fulfilled, (state, action: PayloadAction<GroupResponse>) => {
         state.loading = false;
-        state.groups.unshift(action.payload.group);
+        if (action.payload.group) {
+          state.groups.unshift(action.payload.group);
+        }
         state.error = null;
       })
       .addCase(createGroupAsync.rejected, (state, action) => {
@@ -215,7 +217,7 @@ const groupSlice = createSlice({
       .addCase(fetchGroupRolesAsync.fulfilled, (state, action: PayloadAction<BatchRoleResponse>) => {
         state.loading = false;
         state.groupRoles = action.payload.roles;
-        state.rolesPagination = action.payload.page;
+        state.rolesPagination = action.payload.page || null;
         state.error = null;
       })
       .addCase(fetchGroupRolesAsync.rejected, (state, action) => {

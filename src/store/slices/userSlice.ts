@@ -114,7 +114,7 @@ const userSlice = createSlice({
       .addCase(fetchUsersAsync.fulfilled, (state, action: PayloadAction<BatchUserResponse>) => {
         state.loading = false;
         state.users = action.payload.users;
-        state.pagination = action.payload.page;
+        state.pagination = action.payload.page || null;
         state.error = null;
       })
       .addCase(fetchUsersAsync.rejected, (state, action) => {
@@ -128,7 +128,7 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserByIdAsync.fulfilled, (state, action: PayloadAction<UserResponse>) => {
         state.loading = false;
-        state.currentUser = action.payload.user;
+        state.currentUser = action.payload.user || null;
         state.error = null;
       })
       .addCase(fetchUserByIdAsync.rejected, (state, action) => {
@@ -142,7 +142,9 @@ const userSlice = createSlice({
       })
       .addCase(createUserAsync.fulfilled, (state, action: PayloadAction<UserResponse>) => {
         state.loading = false;
-        state.users.unshift(action.payload.user);
+        if (action.payload.user) {
+          state.users.unshift(action.payload.user);
+        }
         state.error = null;
       })
       .addCase(createUserAsync.rejected, (state, action) => {

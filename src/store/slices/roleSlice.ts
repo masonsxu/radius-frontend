@@ -151,7 +151,7 @@ const roleSlice = createSlice({
       .addCase(fetchRolesAsync.fulfilled, (state, action: PayloadAction<BatchRoleResponse>) => {
         state.loading = false;
         state.roles = action.payload.roles;
-        state.pagination = action.payload.page;
+        state.pagination = action.payload.page || null;
         state.error = null;
       })
       .addCase(fetchRolesAsync.rejected, (state, action) => {
@@ -165,7 +165,7 @@ const roleSlice = createSlice({
       })
       .addCase(fetchRoleByIdAsync.fulfilled, (state, action: PayloadAction<RoleResponse>) => {
         state.loading = false;
-        state.currentRole = action.payload.role;
+        state.currentRole = action.payload.role || null;
         state.error = null;
       })
       .addCase(fetchRoleByIdAsync.rejected, (state, action) => {
@@ -179,7 +179,9 @@ const roleSlice = createSlice({
       })
       .addCase(createRoleAsync.fulfilled, (state, action: PayloadAction<RoleResponse>) => {
         state.loading = false;
-        state.roles.unshift(action.payload.role);
+        if (action.payload.role) {
+          state.roles.unshift(action.payload.role);
+        }
         state.error = null;
       })
       .addCase(createRoleAsync.rejected, (state, action) => {
@@ -289,7 +291,7 @@ const roleSlice = createSlice({
       .addCase(searchRolesAsync.fulfilled, (state, action: PayloadAction<BatchRoleResponse>) => {
         state.loading = false;
         state.roles = action.payload.roles;
-        state.pagination = action.payload.page;
+        state.pagination = action.payload.page || null;
         state.error = null;
       })
       .addCase(searchRolesAsync.rejected, (state, action) => {
