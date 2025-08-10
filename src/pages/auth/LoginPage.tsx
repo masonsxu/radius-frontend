@@ -50,16 +50,18 @@ const LoginPage: React.FC = () => {
   return (
     <div
       style={{
-        minHeight: '100vh',
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        width: '100vw',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       }}
     >
       <Card
         style={{
-          width: 400,
+          width: '80%', // Adjusted to fit different screen sizes
+          maxWidth: 400, // Maximum width for larger screens
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         }}
       >
