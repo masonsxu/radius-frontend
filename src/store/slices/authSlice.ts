@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AuthState, LoginRequest, LoginResponse, LoginUserInfo } from '../../types';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { authService } from '../../services/auth';
+import type { AuthState, LoginRequest, LoginResponse } from '../../types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -74,7 +75,7 @@ const authSlice = createSlice({
         state.token = action.payload.accessToken;
         // 从用户的角色中提取权限
         const permissions: string[] = [];
-        action.payload.userInfo.roles.forEach(role => {
+        action.payload.userInfo.roles?.forEach(role => {
           // 这里需要获取角色对应的权限，暂时先用空数组
         });
         state.permissions = permissions;
@@ -98,7 +99,7 @@ const authSlice = createSlice({
           state.user = action.payload.userInfo;
           // 从用户的角色中提取权限
           const permissions: string[] = [];
-          action.payload.userInfo.roles.forEach(role => {
+          action.payload.userInfo.roles?.forEach(role => {
             // 这里需要获取角色对应的权限，暂时先用空数组
           });
           state.permissions = permissions;

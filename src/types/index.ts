@@ -9,6 +9,7 @@ export interface LoginUserInfo {
   username: string;
   name: string;
   loginTime: number;
+  roles?: Role[];  // 添加角色信息，可选属性
 }
 
 export interface LoginResponse {
